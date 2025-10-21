@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kebabi's Calculator</title>
+  <style>
+    :root {
+      --red: #b91c1c;
+      --yellow: #facc15;
+      --dark: #3a2a15;
+      --card: #fffaf0;
+      --shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+      font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(120deg, #fff176, #ffb347, #ff7043);
+      background-size: 200% 200%;
+      animation: bgShift 10s ease infinite alternate;
+      color: var(--dark);
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    @keyframes bgShift {
+      from { background-position: 0% 50%; }
+      to { background-position: 100% 50%; }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    header {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      border-radius: 16px;
+      background: linear-gradient(90deg, #b91c1c 0%, #facc15 100%);
+      color: #fff;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -150px;
+      width: 100px;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.4);
+      transform: skewX(-25deg);
+      animation: shine 4s linear infinite;
+    }
+
+    @keyframes shine {
+      0% { left: -150px; }
+      100% { left: 120%; }
+    }
+
+    .brand {
+      font-weight: 800;
+      font-size: 28px;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .menu-card, .summary, .seasonal-card {
+      background: var(--card);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+      animation: fadeInUp 0.8s ease;
+    }
+
+    .summary {
+      margin-top: 30px;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2.section {
+      margin: 14px 0;
+      font-size: 20px;
+      color: var(--red);
+      border-bottom: 3px solid var(--yellow);
+      padding-bottom: 4px;
+      text-align: center;
+      background: var(--yellow);
+      border-radius: 8px;
+      color: #7c2d12;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.7);
+    }
+
+    /* Food Menu grid */
+    #food.items {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    #food .item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      transition: 0.3s ease;
+      text-align: center;
+    }
+
+    #food .item:hover { transform: scale(1.03); }
+
+    #food .name {
+      font-weight: 700;
+      color: #7c2d12;
+      margin-bottom: 6px;
+    }
+
+    #food input {
+      width: 70px;
+      height: 32px;
+      padding: 4px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    #food .price {
+      font-size: 14px;
+      color: #92400e;
+    }
+
+    /* Drinks & Seasonal Menus unchanged */
+    .items {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      transition: 0.3s ease;
+    }
+
+    .item:hover { transform: scale(1.02); }
+    .item .name { font-weight: 700; color: #7c2d12; }
+    .item .price { font-size: 13px; color: #92400e; }
+
+    .item input {
+      width: 70px;
+      height: 30px;
+      padding: 4px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .item input:focus, #food input:focus {
+      border-color: var(--yellow);
+      box-shadow: 0 0 8px var(--yellow);
+    }
+
+    .summary h3 {
+      margin-top: 0;
+      color: #7c2d12;
+      text-align: center;
+    }
+
+    .line {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 4px;
+      border-bottom: 1px dashed #ccc;
+      color: #7c2d12;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .total {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 900;
+      font-size: 18px;
+      padding-top: 8px;
+      color: #7c2d12;
+    }
+
+    .total.update { animation: pulse 0.4s ease; }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); color: #b91c1c; }
+      50% { transform: scale(1.15); color: #facc15; }
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: var(--red);
+      color: #fff;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    button.alt {
+      background: transparent;
+      color: var(--red);
+      border: 2px solid var(--red);
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 12px rgba(255, 204, 0, 0.7);
+    }
+
+    footer {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: #78350f;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">Kebabi's Calculator</div>
+    </header>
+
+    <main class="menu-card">
+      <h2 class="section">Food Menu</h2>
+      <div class="items" id="food"></div>
+
+      <h2 class="section">Drinks Menu</h2>
+      <div class="items" id="drinks"></div>
+    </main>
+
+    <aside>
+      <div class="seasonal-card">
+        <h2 class="section">Seasonal Menu</h2>
+        <div class="items" id="seasonal"></div>
+      </div>
+
+      <div class="summary" id="right-panel">
+        <h3>Order Summary</h3>
+        <div id="metaStamp" style="font-size:13px;color:#92400e;text-align:center;">Not yet updated</div>
+        <div id="breakdown"></div>
+        <div class="total"><div>Total</div><div id="grandTotal">$0</div></div>
+
+        <div class="controls">
+          <button id="printBtn">Copy Receipt</button>
+          <button id="clearBtn" class="alt">Clear Quantities</button>
+        </div>
+      </div>
+    </aside>
+
+    <footer>Built for Kebabi’s — Windows Edition 🍢🔥</footer>
+  </div>
+
+  <script>
+    const MENU = {
+      food: [
+        { name: 'Beef Kebab Plate', price: 850 },
+        { name: 'Chicken Kebab Plate', price: 650 },
+        { name: "Nadja’s Down Unda Shrimp Kebab Plate", price: 650 },
+        { name: "Taryn’s Veggie Kebab Plate", price: 650 },
+        { name: "Iris’s Loaded Fries", price: 850 },
+        { name: 'Pita & Hummus', price: 500 },
+        { name: "Sage’s Shawarma Wrap", price: 700 },
+        { name: "Classic Lamb PD Wrap", price: 700 },
+        { name: 'House Salad', price: 650 }
+      ],
+      drinks: [
+        { name: 'Tamarind Juice', price: 600 },
+        { name: "Becca’s Peach Bellini (Alcoholic)", price: 850 },
+        { name: "Dessa’s Hibiscus Tea", price: 850 }
+      ],
+      seasonal: [
+        { name: 'Cardamon Chai', price: 850 },
+        { name: 'Pumpkin Spice Lokma', price: 700 },
+        { name: 'Harvest Kebabi', price: 850 }
+      ]
+    };
+
+    function renderFood() {
+      const section = document.getElementById('food');
+      MENU.food.forEach(i => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML = `
+          <div class='name'>${i.name}</div>
+          <input type='number' min='0' value='0' data-name='${i.name}' data-price='${i.price}'>
+          <div class='price'>$${i.price}</div>
+        `;
+        section.appendChild(div);
+      });
+    }
+
+    function render(sectionId, items) {
+      const section = document.getElementById(sectionId);
+      items.forEach(i => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML = `
+          <div>
+            <div class='name'>${i.name}</div>
+            <div class='price'>$${i.price}</div>
+          </div>
+          <input type='number' min='0' value='0' data-name='${i.name}' data-price='${i.price}'>
+        `;
+        section.appendChild(div);
+      });
+    }
+
+    renderFood();
+    ['drinks', 'seasonal'].forEach(k => render(k, MENU[k]));
+
+    const breakdown = document.getElementById('breakdown');
+    const totalDisplay = document.getElementById('grandTotal');
+
+    function updateTotal() {
+      const inputs = document.querySelectorAll('input[type="number"]');
+      breakdown.innerHTML = '';
+      let total = 0;
+      const lines = [];
+
+      inputs.forEach(inp => {
+        const qty = parseInt(inp.value) || 0;
+        const price = parseInt(inp.dataset.price);
+        if (qty > 0) {
+          const sub = qty * price;
+          total += sub;
+          lines.push({ name: inp.dataset.name, qty, sub });
+        }
+      });
+
+      if (lines.length > 0) {
+        lines.forEach(l => {
+          const row = document.createElement('div');
+          row.className = 'line';
+          row.textContent = `${l.qty} × ${l.name} - $${l.sub}`;
+          breakdown.appendChild(row);
+        });
+      } else {
+        breakdown.innerHTML = '<div style="color:#92400e;padding:6px;text-align:center;">No items selected.</div>';
+      }
+
+      totalDisplay.textContent = `$${total.toLocaleString()}`;
+      totalDisplay.parentElement.classList.add('update');
+      setTimeout(() => totalDisplay.parentElement.classList.remove('update'), 400);
+      document.getElementById('metaStamp').textContent = `Updated: ${new Date().toLocaleString()}`;
+    }
+
+    document.addEventListener('input', e => {
+      if (e.target.matches('input[type="number"]')) updateTotal();
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      document.querySelectorAll('input[type="number"]').forEach(i => (i.value = 0));
+      updateTotal();
+    });
+
+    document.getElementById('printBtn').addEventListener('click', async () => {
+      let text = '';
+      document.querySelectorAll('.line').forEach(l => (text += l.textContent + '\n'));
+      text += `Total: ${totalDisplay.textContent}\n${new Date().toLocaleString()}\n`;
+      try {
+        await navigator.clipboard.writeText(text);
+        alert('Receipt copied! Paste it anywhere.');
+      } catch (e) {
+        alert('Clipboard blocked.');
+      }
+    });
+  </script>
+</body>
+</html>
