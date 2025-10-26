@@ -359,6 +359,61 @@
     const breakdown = document.getElementById('breakdown');
     const totalDisplay = document.getElementById('grandTotal');
 
+    // --- Sales Tracking --- //
+    const SALES_KEY = "kebabi_sales_log";
+    let salesLog = JSON.parse(localStorage.getItem(SALES_KEY)) || [];
+
+    // Auto-save each change in total
+    function logSale(total) {
+      if (total <= 0) return;
+      const last = salesLog[salesLog.length - 1];
+      if (!last || last.total !== total) {
+        salesLog.push({ total, date: new Date().toISOString() });
+        localStorage.setItem(SALES_KEY, JSON.stringify(salesLog));
+        updateSalesSummary();
+      }
+    }
+
+    // Calculate totals for time ranges
+    function getSalesTotal(days) {
+      const now = new Date();
+      return salesLog
+        .filter(s => (now - new Date(s.date)) / (1000 * 60 * 60 * 24) <= days)
+        .reduce((sum, s) => sum + s.total, 0);
+    }
+
+    // Create sales summary section
+    const salesSummary = document.createElement('div');
+    salesSummary.className = 'summary';
+    salesSummary.innerHTML = `
+      <h3>Sales Tracker</h3>
+      <div id="salesToday">Today: $0</div>
+      <div id="salesWeek">Last 7 Days: $0</div>
+      <div id="salesAll">All Time: $0</div>
+      <div style="margin-top:8px; text-align:center;">
+        <button id="clearSalesBtn" class="alt">Clear Sales Log</button>
+      </div>
+    `;
+    document.querySelector('aside').appendChild(salesSummary);
+
+    // Update the numbers in the sidebar
+    function updateSalesSummary() {
+      const today = getSalesTotal(1);
+      const week = getSalesTotal(7);
+      const all = getSalesTotal(9999);
+
+      document.getElementById('salesToday').textContent = `Today: $${today.toLocaleString()}`;
+      document.getElementById('salesWeek').textContent = `Last 7 Days: $${week.toLocaleString()}`;
+      document.getElementById('salesAll').textContent = `All Time: $${all.toLocaleString()}`;
+    }
+
+    document.getElementById('clearSalesBtn')?.addEventListener('click', () => {
+      salesLog = [];
+  localStorage.removeItem(SALES_KEY);
+  updateSalesSummary();
+});
+
+    // --- Main total update function --- //
     function updateTotal() {
       const inputs = document.querySelectorAll('input[type="number"]');
       breakdown.innerHTML = '';
@@ -390,6 +445,9 @@
       totalDisplay.parentElement.classList.add('update');
       setTimeout(() => totalDisplay.parentElement.classList.remove('update'), 400);
       document.getElementById('metaStamp').textContent = `Updated: ${new Date().toLocaleString()}`;
+
+      // Auto-log sale and update summary
+      logSale(total);
     }
 
     document.addEventListener('input', e => {
@@ -412,6 +470,9 @@
         alert('Clipboard blocked.');
       }
     });
+
+    // Initialize summary on load
+    updateSalesSummary();
   </script>
 </body>
 </html>
