@@ -447,7 +447,7 @@
       document.getElementById('metaStamp').textContent = `Updated: ${new Date().toLocaleString()}`;
 
       // Auto-log sale and update summary
-      logSale(total);
+      // logSale(total);
     }
 
     document.addEventListener('input', e => {
@@ -463,16 +463,24 @@
       let text = '';
       document.querySelectorAll('.line').forEach(l => (text += l.textContent + '\n'));
       text += `Total: ${totalDisplay.textContent}\n${new Date().toLocaleString()}\n`;
+
+      const totalValue = parseInt(totalDisplay.textContent.replace(/\D/g, '')) || 0;
+
+      if (totalValue > 0) {
+        logSale(totalValue); // record sale only when pressing Copy Receipt
+        updateSalesSummary(); // update totals
+      }
+
       try {
         await navigator.clipboard.writeText(text);
         alert('Receipt copied! Paste it anywhere.');
-      } catch (e) {
-        alert('Clipboard blocked.');
-      }
+      } catch (e) {}
     });
+
 
     // Initialize summary on load
     updateSalesSummary();
   </script>
 </body>
 </html>
+
